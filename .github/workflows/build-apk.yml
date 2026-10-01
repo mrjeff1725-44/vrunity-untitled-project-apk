@@ -1,0 +1,27 @@
+name: Build VR APK
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v3
+        with:
+          gradle-version: '8.2'
+      - name: Point Gradle at the Android SDK
+        run: echo "sdk.dir=$ANDROID_SDK_ROOT" > local.properties
+      - name: Build the game
+        run: gradle assembleDebug --no-daemon
+      - name: Publish the APK
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: apk-${{ github.run_id }}
+          name: VR game build ${{ github.run_id }}
+          files: app/build/outputs/apk/debug/app-debug.apk

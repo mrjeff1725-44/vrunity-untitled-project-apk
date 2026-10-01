@@ -1,0 +1,25 @@
+plugins {
+    id 'com.android.application'
+    id 'org.jetbrains.kotlin.android'
+}
+android {
+    namespace 'com.vrunity.vrapk'
+    compileSdk 34
+    defaultConfig {
+        applicationId 'com.vrunity.vrapk'
+        minSdk 24
+        targetSdk 34
+        versionCode 1790897961
+        versionName '1.961'
+    }
+    buildTypes {
+        release { minifyEnabled false }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+}
