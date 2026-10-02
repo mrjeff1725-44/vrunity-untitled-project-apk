@@ -8,8 +8,8 @@ import android.hardware.SensorManager
 import android.opengl.GLSurfaceView
 import android.view.MotionEvent
 
-// The screen the game draws on, plus the headset's motion sensors feeding it the
-// head's orientation.
+// The screen the game draws on in screen mode, plus the headset's motion sensors
+// feeding it the head's orientation.
 class VrSurfaceView(context: Context) : GLSurfaceView(context), SensorEventListener {
     private val renderer = VrRenderer(context)
     private val sensors = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager

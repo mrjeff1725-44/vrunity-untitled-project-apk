@@ -6,29 +6,48 @@ import android.view.KeyEvent
 import android.view.View
 import android.view.WindowManager
 
-// A native Android VR game: fullscreen, awake, stereoscopic, and playable with
-// nothing but the headset's own buttons.
+// A native Android VR game. On a headset the app opens straight into the headset's
+// own VR session; on a device without one it falls back to screen mode.
 class MainActivity : Activity() {
-    private lateinit var surface: VrSurfaceView
+    private var surface: VrSurfaceView? = null
+    private var screenMode = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-        surface = VrSurfaceView(this)
-        setContentView(surface)
+        setContentView(View(this))
+        // The headset's VR runtime is tried first, off the main thread — it does not
+        // answer instantly.
+        val thread = Thread {
+            val tookVr = XrSession(this).run()
+            runOnUiThread {
+                if (tookVr) finish() else startScreenMode()
+            }
+        }
+        thread.start()
+    }
+
+    private fun startScreenMode() {
+        if (screenMode) return
+        screenMode = true
+        val s = VrSurfaceView(this)
+        surface = s
+        setContentView(s)
+        s.onResume()
+        s.startSensors()
         fullscreen()
     }
 
     override fun onResume() {
         super.onResume()
-        surface.onResume()
-        surface.startSensors()
+        surface?.onResume()
+        surface?.startSensors()
         fullscreen()
     }
 
     override fun onPause() {
-        surface.stopSensors()
-        surface.onPause()
+        surface?.stopSensors()
+        surface?.onPause()
         super.onPause()
     }
 
@@ -37,16 +56,19 @@ class MainActivity : Activity() {
         if (hasFocus) fullscreen()
     }
 
-    // Volume up walks forward, volume down walks back — reachable by touch while
-    // the device is inside a headset, so the game needs no controller.
+    // Screen mode only: volume up walks forward, volume down walks back, reachable
+    // by touch while the device sits in a phone holder.
     override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
-        if (keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
-            surface.walk(1f)
-            return true
-        }
-        if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) {
-            surface.walk(-1f)
-            return true
+        val s = surface
+        if (s != null) {
+            if (keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
+                s.walk(1f)
+                return true
+            }
+            if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) {
+                s.walk(-1f)
+                return true
+            }
         }
         return super.onKeyDown(keyCode, event)
     }

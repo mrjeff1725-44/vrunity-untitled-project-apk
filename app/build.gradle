@@ -5,12 +5,14 @@ plugins {
 android {
     namespace 'com.vrunity.vrapk'
     compileSdk 34
+    ndkVersion '26.1.10909125'
     defaultConfig {
         applicationId 'com.vrunity.vrapk'
-        minSdk 24
+        minSdk 29
         targetSdk 34
-        versionCode 1790897961
-        versionName '1.961'
+        versionCode 1790899554
+        versionName '1.554'
+        ndk { abiFilters 'arm64-v8a' }
     }
     buildTypes {
         release { minifyEnabled false }
@@ -21,5 +23,10 @@ android {
     }
     kotlinOptions {
         jvmTarget = '1.8'
+    }
+    externalNativeBuild {
+        cmake {
+            path 'src/main/cpp/CMakeLists.txt'
+        }
     }
 }
